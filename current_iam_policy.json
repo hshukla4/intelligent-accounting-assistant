@@ -1,0 +1,24 @@
+{
+  "bindings": [
+    {
+      "members": [
+        "projectEditor:accounting-ai-gcp-462320",
+        "projectOwner:accounting-ai-gcp-462320"
+      ],
+      "role": "roles/storage.legacyBucketOwner"
+    },
+    {
+      "members": [
+        "projectViewer:accounting-ai-gcp-462320"
+      ],
+      "role": "roles/storage.legacyBucketReader"
+    },
+    {
+      "members": [
+        "serviceAccount:service-763352790729@gcp-sa-prod-dai-core.iam.gserviceaccount.com"
+      ],
+      "role": "roles/storage.objectViewer"
+    }
+  ],
+  "etag": "CAM="
+}

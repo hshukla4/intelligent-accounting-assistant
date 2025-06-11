@@ -1,0 +1,18 @@
+# Python
+*.pyc
+__pycache__/
+.venv/
+env/
+*.egg-info/
+
+# Environment files
+.env
+
+# Data folders
+data/output/
+data/raw_documents/
+
+# IDE/editor
+.vscode/
+.idea/
+.DS_Store

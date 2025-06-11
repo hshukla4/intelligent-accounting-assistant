@@ -1,0 +1,7 @@
+google-cloud-documentai
+google-cloud-storage
+google-cloud-bigquery
+google-cloud-aiplatform # For Vertex AI (Gemini models)
+pydantic # Good for data validation
+python-dotenv # For local environment variables
+# Add other libraries as needed (e.g., flask/fastapi if building an API)
