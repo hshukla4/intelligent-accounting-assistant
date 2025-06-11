@@ -1,7 +1,6 @@
 # src/transaction_ai/categorization.py
-import vertexai
-from vertexai.language_models import TextGenerationModel # For Gemini-Pro
-from config.settings import VERTEX_AI_CATEGORIZATION_ENDPOINT_ID, GCP_PROJECT_ID, GCP_REGION
+from vertexai.language_models import TextGenerationModel  # For Gemini-Pro
+
 from src.utils.gcp_auth import init_vertex_ai_sdk
 from src.utils.logger import get_logger
 
@@ -9,6 +8,7 @@ logger = get_logger(__name__)
 
 # Initialize Vertex AI SDK
 init_vertex_ai_sdk()
+
 
 def get_gemini_model():
     """Gets the Gemini-Pro model for text generation."""
@@ -18,7 +18,10 @@ def get_gemini_model():
         logger.error(f"Error loading Gemini-Pro model: {e}")
         raise
 
-def suggest_category_with_gemini(transaction_description: str, existing_categories: list) -> str:
+
+def suggest_category_with_gemini(
+    transaction_description: str, existing_categories: list
+) -> str:
     """
     Suggests an accounting category for a transaction using Gemini-Pro.
 
@@ -45,15 +48,23 @@ def suggest_category_with_gemini(transaction_description: str, existing_categori
         response = model.predict(prompt=prompt, temperature=0.2, max_output_tokens=50)
         suggested_category = response.text.strip()
         # Basic validation: ensure the suggested category is one of the allowed ones, or a fallback
-        if suggested_category in existing_categories or suggested_category in ["Other", "Uncategorized"]:
-            logger.info(f"Categorized '{transaction_description}' as: {suggested_category}")
+        if suggested_category in existing_categories or suggested_category in [
+            "Other",
+            "Uncategorized",
+        ]:
+            logger.info(
+                f"Categorized '{transaction_description}' as: {suggested_category}"
+            )
             return suggested_category
         else:
-            logger.warning(f"Gemini suggested an unrecognized category '{suggested_category}' for '{transaction_description}'. Defaulting to 'Uncategorized'.")
+            logger.warning(
+                f"Gemini suggested an unrecognized category '{suggested_category}' for '{transaction_description}'. Defaulting to 'Uncategorized'."
+            )
             return "Uncategorized"
     except Exception as e:
         logger.error(f"Error calling Gemini for categorization: {e}")
         return "Categorization_Error"
+
 
 # For a custom endpoint, you would import and use get_aiplatform_endpoint_client
 # and the appropriate prediction instance schema.

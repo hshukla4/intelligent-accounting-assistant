@@ -1,17 +1,18 @@
 # src/anomaly_detection/detection.py
-from google.cloud.aiplatform.gapic.schema import predict
-from src.utils.gcp_auth import get_aiplatform_endpoint_client
-from config.settings import GCP_PROJECT_ID, GCP_REGION, VERTEX_AI_ANOMALY_ENDPOINT_ID
+
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
 
 def detect_anomaly(transaction_data: dict) -> dict:
     """
     Placeholder for anomaly detection.
     This function would send transaction data to a deployed Vertex AI anomaly detection model.
     """
-    logger.info(f"Sending transaction data for anomaly detection: {transaction_data.get('description')}")
+    logger.info(
+        f"Sending transaction data for anomaly detection: {transaction_data.get('description')}"
+    )
     # In a real scenario, you'd format 'transaction_data' as expected by your model
     # and call the Vertex AI PredictionServiceClient.
 

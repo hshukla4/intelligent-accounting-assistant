@@ -3,6 +3,7 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+
 def reconcile_transactions(bank_transactions: list, gl_transactions: list) -> dict:
     """
     Placeholder for reconciliation logic.
@@ -22,7 +23,9 @@ def reconcile_transactions(bank_transactions: list, gl_transactions: list) -> di
     for bt in bank_transactions:
         found_match = False
         for glt in gl_transactions:
-            if bt.get("amount") == glt.get("amount") and bt.get("date") == glt.get("date"):
+            if bt.get("amount") == glt.get("amount") and bt.get("date") == glt.get(
+                "date"
+            ):
                 matches.append({"bank_tx": bt, "gl_tx": glt})
                 found_match = True
                 break
@@ -42,6 +45,5 @@ def reconcile_transactions(bank_transactions: list, gl_transactions: list) -> di
     return {
         "matches": matches,
         "unmatched_bank": unmatched_bank,
-        "unmatched_gl": unmatched_gl
+        "unmatched_gl": unmatched_gl,
     }
-

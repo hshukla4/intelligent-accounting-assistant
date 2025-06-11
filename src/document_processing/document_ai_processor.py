@@ -1,22 +1,21 @@
-import os
-import sys
-import json
 import logging
+import os
 from datetime import datetime
 
-from google.cloud import storage
 from google.api_core.client_options import ClientOptions
 from google.cloud import documentai_v1 as documentai
+from google.cloud import storage
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class PipelineController:
     def __init__(self):
         # --- Load config from ENV ---
-        self.project_id       = os.getenv("GCP_PROJECT_ID")
-        self.location         = os.getenv("GCP_REGION", "us")
-        self.raw_bucket       = os.getenv("GCS_RAW_DOCUMENTS_BUCKET")
+        self.project_id = os.getenv("GCP_PROJECT_ID")
+        self.location = os.getenv("GCP_REGION", "us")
+        self.raw_bucket = os.getenv("GCS_RAW_DOCUMENTS_BUCKET")
         self.processed_bucket = os.getenv("GCS_PROCESSED_DOCUMENTS_BUCKET")
         w2_id = os.getenv("DOCUMENT_AI_W2_PROCESSOR_ID")
         if not w2_id:
@@ -54,7 +53,7 @@ class PipelineController:
         timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
         blob_name = f"raw_documents/w2/{timestamp}_{os.path.basename(local_path)}"
         bucket = self.storage_client.bucket(self.raw_bucket)
-        blob   = bucket.blob(blob_name)
+        blob = bucket.blob(blob_name)
         blob.upload_from_filename(local_path)
         gcs_input_uri = f"gs://{self.raw_bucket}/{blob_name}"
         logger.info(f"Uploaded PDF → {gcs_input_uri}")
@@ -66,9 +65,8 @@ class PipelineController:
         request = documentai.ProcessRequest(
             name=self.w2_processor_name,
             raw_document=documentai.RawDocument(
-                content=content,
-                mime_type="application/pdf"
-            )
+                content=content, mime_type="application/pdf"
+            ),
         )
         result = self.docai_client.process_document(request=request)
         logger.info("Document AI inline processing succeeded.")
@@ -79,13 +77,17 @@ class PipelineController:
             field = ent.type_
             entry = {
                 "value": ent.mention_text,
-                "page": ent.page_anchor.page_refs[0].page
+                "page": ent.page_anchor.page_refs[0].page,
             }
             output.setdefault(field, []).append(entry)
-            logger.info(f"Field: {field} | Value: {entry['value']} | Page: {entry['page']}")
+            logger.info(
+                f"Field: {field} | Value: {entry['value']} | Page: {entry['page']}"
+            )
         return output
 
+
 # Exposed entrypoint for src/main.py
+
 
 def run_pipeline(local_path: str, doc_type: str) -> dict:
     controller = PipelineController()
