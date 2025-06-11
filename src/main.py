@@ -2,12 +2,25 @@
 import sys
 import os
 import csv
-import logging
+
 from datetime import datetime
 from src.pipeline.pipeline_controller import run_pipeline
+import logging
+import google.cloud.logging
+from google.cloud.logging.handlers import StructuredLogHandler
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# 1) Basic console/file logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+)
+logger = logging.getLogger()  # grab the root logger
+
+# 2) Cloud logging setup (sync)
+client = google.cloud.logging.Client()
+handler = StructuredLogHandler()            # or StructuredLogHandler(client=client)
+logger.addHandler(handler)
+
 
 # Output directories and filenames
 OUTPUT_DIR = os.path.join("data", "output")

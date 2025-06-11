@@ -1,60 +1,118 @@
-# Intelligent Accounting Assistant (IAA)
+# Intelligent Accounting Assistant
 
-This project leverages Google Cloud's AI services (specifically Vertex AI with Gemini models and Document AI) to automate and enhance key accounting processes for small to medium-sized businesses (SMBs).
+## Purpose
 
-## Core Features:
-- **Document Processing & Data Extraction:** Automated data entry from financial documents (invoices, receipts).
-- **Transaction Categorization & Reconciliation:** Intelligent categorization and reconciliation assistance.
-- **Financial Reporting & Analysis:** Generate insights and reports.
-- **Anomaly Detection:** Identify unusual patterns in financial transactions.
+Intelligent Accounting Assistant is a command-line tool designed to automate the extraction and analysis of financial document data (e.g., W2s, invoices, receipts). It streamlines the processing of raw PDFs into structured spreadsheets, significantly reducing manual data entry and enabling faster financial insights.
 
-## Setup & Running:
+## Functional Description
 
-1.  **Google Cloud Setup:**
-    - Create a GCP Project.
-    - Enable required APIs (Vertex AI, Document AI, BigQuery, Cloud Storage, Cloud Functions/Run, Logging, Monitoring).
-    - Create necessary GCS buckets (for raw docs, processed docs, model artifacts).
-    - Create Document AI processors (Invoice Parser, Receipt Parser) in your chosen region.
-    - Set up a Service Account with appropriate roles for the application.
+The application ingests raw financial documents from a local directory or Cloud Storage bucket and processes each file based on its specified type (e.g., `w2`, `invoice`, `receipt`). Key features include:
 
-2.  **Local Environment Setup:**
-    ```bash
-    # Navigate to the project root
-    cd intelligent-accounting-assistant
+- **Document Type Parsing**: Uses GCP Document AI and custom parsers to extract fields such as company/vendor name, address, contact number, and line-item details.
+- **Output Generation**: Produces detailed and summary Excel spreadsheets for each document with embedded timestamp and naming conventions for traceability.
+- **Console Summary**: At the end of each run, prints a summary table showing:
+  - **Timestamp**: Processing timestamp (YYYYMMDDHHMMSS)
+  - **Input File Name**: Original document name
+  - **Input Directory**: Source directory or bucket
+  - **Document Type**: Type identifier (e.g., `w2`)
+  - **Detailed Output File**: Name of the spreadsheet with all extracted fields
+  - **Summary Output File**: Name of the spreadsheet with key summary metrics
 
-    # Set up Python virtual environment
-    python -m venv venv
-    source venv/bin/activate # On Windows: venv\Scripts\activate
+Filename conventions ensure each output file includes both the processing timestamp and, for invoices/receipts, the vendor or company name (e.g., `20250610115337_ACME_Corp_Invoice.xlsx`).
 
-    # Install dependencies
-    pip install -r requirements.txt
-    ```
+## Summary on Console
 
-3.  **Configuration:**
-    - Create a `.env` file in the project root and fill in your GCP project details, processor IDs, etc. (See `.env.example` or `config/settings.py` for variables). **DO NOT COMMIT THIS FILE TO GIT.**
+Example summary printed after processing:
 
-4.  **Authentication:**
-    - For local development, authenticate your `gcloud` CLI:
-      ```bash
-      gcloud auth application-default login
-      ```
+```
+| Timestamp      | Input File       | Doc Type | Detailed Output File                  | Summary Output File              |
+|----------------|------------------|----------|---------------------------------------|----------------------------------|
+| 20250610115337 | W2-Sample1.pdf   | w2       | 20250610115337_W2-Sample1_Detail.xlsx | 20250610115337_W2_Summary.xlsx   |
+```
 
-5.  **Run (Example):**
-    ```bash
-    python src/main.py
-    ```
+## Project Structure
 
-## Project Structure:
+```
+intelligent-accounting-assistant/
+├── src/
+│   ├── main.py
+│   ├── pipeline/
+│   │   └── pipeline_controller.py
+│   ├── data_storage/
+│   │   └── gcs_handler.py
+│   └── parsers/
+│       └── w2_parser.py
+├── scripts/
+│   └── parse_all.sh
+├── requirements.txt
+└── README.md
+```
 
-- `config/`: Configuration settings.
-- `src/`: Main application source code.
-    - `document_processing/`: Handlers for Document AI.
-    - `transaction_ai/`: Logic for categorization and reconciliation.
-    - `anomaly_detection/`: Logic for anomaly detection.
-    - `data_storage/`: Handlers for GCS and BigQuery.
-    - `utils/`: Utility functions (logger, GCP auth).
-    - `api/`: (Optional) REST API definitions.
-- `notebooks/`: Jupyter notebooks for experimentation and model training.
-- `data/`: Placeholder for raw, processed, and training data.
-- `models/`: Placeholder for saved model artifacts.
-- `deployment/`: Configuration and scripts for deploying to GCP services (Cloud Functions, Cloud Run).
+## Prerequisites
+
+- Python 3.12+
+- Google Cloud SDK (authenticated via `gcloud auth login`)
+- GCP project with Document AI and Cloud Storage APIs enabled
+- Service account with Storage Admin and Document AI roles
+- Python dependencies: install via `pip install -r requirements.txt`
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/<org>/intelligent-accounting-assistant.git
+   cd intelligent-accounting-assistant
+   ```
+2. Create and activate a Python virtual environment:
+   ```bash
+   python3.12 -m venv .venv
+   source .venv/bin/activate
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
+
+## GCP Setup
+
+1. Set environment variables:
+   ```bash
+   export GCP_PROJECT=<your-gcp-project-id>
+   export GCP_REGION=us-central1
+   export CLOUDSDK_PYTHON=$(which python3.12)
+   ```
+2. Create Cloud Storage buckets:
+   ```bash
+   gsutil mb -l $GCP_REGION gs://$GCP_PROJECT-raw-docs
+   gsutil mb -l $GCP_REGION gs://$GCP_PROJECT-processed-docs
+   gsutil mb -l $GCP_REGION gs://$GCP_PROJECT-model-artifacts
+   ```
+3. Enable required APIs:
+   ```bash
+   gcloud services enable storage.googleapis.com \
+       documentai.googleapis.com
+   ```
+
+## Usage
+
+- **Process a single document**:
+  ```bash
+  python -m src.main data/raw_documents/W2-Sample1.pdf w2
+  ```
+- **Batch process all documents**:
+  ```bash
+  bash scripts/parse_all.sh data/raw_documents output_directory
+  ```
+
+## Technology Stack
+
+- **Language**: Python 3.12
+- **Cloud**: Google Cloud Platform (Storage, Document AI)
+- **Libraries**: `google-cloud-storage`, `google-cloud-documentai`, `pandas`, `openpyxl`
+
+## Contribution
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+## License
+
+This project is licensed under the MIT License.
+
